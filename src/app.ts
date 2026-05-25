@@ -2,6 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import jobRoutes from './routes/job.routes';
+import savedJobRoutes from './routes/savedJob.routes';
+import uploadRoutes from './routes/upload.routes';
+import aiRoutes from './routes/ai.routes';
 import { errorHandler } from './middlewares/error.middleware';
 
 // Initialize the Express application
@@ -24,6 +27,15 @@ app.use('/api/auth', authRoutes);
 
 // All job-related routes will be prefixed with /api/jobs
 app.use('/api/jobs', jobRoutes);
+
+// All saved job routes will be prefixed with /api/saved-jobs
+app.use('/api/saved-jobs', savedJobRoutes);
+
+// Image upload routes
+app.use('/api/upload', uploadRoutes);
+
+// AI generation routes
+app.use('/api/ai', aiRoutes);
 
 // Global Error Handler
 // This must be the VERY LAST middleware added to the app!

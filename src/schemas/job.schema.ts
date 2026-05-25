@@ -6,6 +6,8 @@ export const createJobSchema = z.object({
     description: z.string().min(10),
     company: z.string().min(2),
     category: z.string().min(2),
+    location: z.string().min(2),
+    jobType: z.string().min(2),
     imageUrl: z.string().url().optional().or(z.literal('')),
     jobUrl: z.string().url(),
   }),

@@ -4,7 +4,7 @@ import { prisma } from '../utils/prisma';
 // Retrieves a list of all jobs from the database
 export const getAllJobs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { search, category, limit } = req.query;
+    const { search, category, limit, location, jobType } = req.query;
 
     // Build the query constraints dynamically
     const whereClause: any = {};
@@ -18,6 +18,14 @@ export const getAllJobs = async (req: Request, res: Response, next: NextFunction
 
     if (category && typeof category === 'string' && category !== 'All') {
       whereClause.category = category;
+    }
+
+    if (location && typeof location === 'string' && location !== 'All' && location.trim() !== '') {
+      whereClause.location = { contains: location, mode: 'insensitive' };
+    }
+
+    if (jobType && typeof jobType === 'string' && jobType !== 'All') {
+      whereClause.jobType = jobType;
     }
 
     // Determine limit
@@ -89,7 +97,7 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
     const userId = req.userId!;
     
     // 2. Extract the job details from the request body
-    const { title, description, company, category, imageUrl, jobUrl } = req.body;
+    const { title, description, company, category, location, jobType, imageUrl, jobUrl } = req.body;
 
     // 3. Create the job in the database, linking it to the current user
     const job = await prisma.job.create({
@@ -98,6 +106,8 @@ export const createJob = async (req: Request, res: Response, next: NextFunction)
         description,
         company,
         category,
+        location,
+        jobType,
         imageUrl,
         jobUrl,
         userId,

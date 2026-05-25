@@ -15,6 +15,7 @@ model User {
   resetPasswordExpires DateTime?
   createdAt            DateTime  @default(now())
   jobs                 Job[]
+  savedJobs            SavedJob[]
 }
 
 model Job {
@@ -25,8 +26,22 @@ model Job {
   category    String   @default("General")
   imageUrl    String?
   jobUrl      String
+  location    String   @default("Remote")
+  jobType     String   @default("Full-time")
   userId      String   @db.Uuid
   user        User     @relation(fields: [userId], references: [id])
+  savedJobs   SavedJob[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model SavedJob {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  jobId     String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  job       Job      @relation(fields: [jobId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, jobId])
 }
