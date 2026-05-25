@@ -27,3 +27,12 @@ export const resetPasswordSchema = z.object({
     password: z.string().min(6),
   }),
 });
+
+export const updateProfileSchema = z.object({
+  body: z.object({
+    email: z.string().email(),
+    name: z.string().optional(),
+    currentPassword: z.string().min(6).optional(),
+    newPassword: z.string().min(6).optional(),
+  }),
+});

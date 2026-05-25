@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { register, login, forgotPassword, resetPassword } from '../controllers/auth.controller';
+import { register, login, forgotPassword, resetPassword, getProfile, updateProfile } from '../controllers/auth.controller';
 import { validate } from '../middlewares/validate.middleware';
-import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } from '../schemas/auth.schema';
+import { authenticate } from '../middlewares/auth.middleware';
+import { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema, updateProfileSchema } from '../schemas/auth.schema';
 
 const router = Router();
 
@@ -18,5 +19,11 @@ router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 
 // POST /api/auth/reset-password -> Reset the password using the token
 router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+
+// GET /api/auth/me -> Fetch the current authenticated user's profile
+router.get('/me', authenticate, getProfile);
+
+// PUT /api/auth/me -> Update the current authenticated user's profile
+router.put('/me', authenticate, validate(updateProfileSchema), updateProfile);
 
 export default router;

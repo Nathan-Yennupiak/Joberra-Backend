@@ -186,3 +186,99 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+// Fetches the current user's profile data
+export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Updates the current user's profile (name, email, and/or password)
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.userId;
+    const { name, email, currentPassword, newPassword } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    // Fetch the user to verify existence and get the current hashed password
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // If they are trying to update their password
+    let updatedHashedPassword = undefined;
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Current password is required to set a new password' });
+      }
+
+      const isMatch = await comparePassword(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Incorrect current password' });
+      }
+
+      updatedHashedPassword = await hashPassword(newPassword);
+    }
+
+    // Check if they are trying to change their email to one that already exists
+    if (email && email !== user.email) {
+      const existingEmail = await prisma.user.findFirst({
+        where: {
+          email,
+          id: { not: userId }, // Make sure it's not their own current email
+        },
+      });
+
+      if (existingEmail) {
+        return res.status(409).json({ message: 'This email is already in use by another account' });
+      }
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(email !== undefined && { email }),
+        ...(updatedHashedPassword && { password: updatedHashedPassword }),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(200).json({ user: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+};
+
