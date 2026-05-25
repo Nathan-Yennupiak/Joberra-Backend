@@ -2,10 +2,11 @@ import { z } from 'zod';
 
 export const createJobSchema = z.object({
   body: z.object({
-    title: z.string().min(1),
-    description: z.string().min(1),
-    company: z.string().min(1),
-    imageUrl: z.string().url().nullish(),
+    title: z.string().min(3),
+    description: z.string().min(10),
+    company: z.string().min(2),
+    category: z.string().min(2),
+    imageUrl: z.string().url().optional().or(z.literal('')),
     jobUrl: z.string().url(),
   }),
 });

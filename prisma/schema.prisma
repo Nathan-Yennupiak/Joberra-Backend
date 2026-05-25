@@ -22,6 +22,7 @@ model Job {
   title       String
   description String
   company     String
+  category    String   @default("General")
   imageUrl    String?
   jobUrl      String
   userId      String   @db.Uuid
